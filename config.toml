@@ -1,0 +1,11 @@
+base_url = "https://mailshine.salt.gg"
+
+[feeds."games"] # Canonical Feed Name
+title = "Games" # For Display -- Title of each Digest
+reddits = ["games", "pcgaming"]
+num_items = 10
+
+[feeds."pcgaming"] # Canonical Feed Name
+title = "PC Gaming" # For Display -- Title of each Digest
+reddits = ["pcgaming"]
+num_items = 20
