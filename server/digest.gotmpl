@@ -90,6 +90,11 @@
       font-weight: 500;
       font-size: 0.8em;
     }
+
+    .block-icon {
+      width: 20px;
+      height: 20px;
+    }
   </style>
 </head>
 
@@ -98,7 +103,7 @@
     {{with .Digest}}
     {{range .Content}}
     <div class="heading">
-      <img src="{{$.BaseURL}}/static/reddit-alien.svg">
+      <img class="block-icon" src="{{$.BaseURL}}/static/reddit-alien.png">
       <h2 class="subreddit"> {{ .Title }} </h2>
     </div>
 
