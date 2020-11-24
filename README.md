@@ -2,7 +2,7 @@
 
 Like [Mailbrew](https://mailbrew.com), but RSS compatible.
 
-Get a daily digest of your favorite subreddits and Twitter posters that you can read in your RSS reader.
+Get a daily digest of your favorite subreddits and Twitter posters that you can peruse in your RSS reader.
 
 **Warning:** Very early WIP, not production ready!
 

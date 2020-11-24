@@ -51,12 +51,13 @@ func (s Service) StartScheduler() {
 			s.createDigest(name)
 		}
 
-		scheduler.Every(1).Day().At("8:00").Do(func() {
+		scheduler.Every(1).Day().At("8:40").Do(func() {
 			log.Printf("Scheduler triggered for %q\n", name)
 			s.createDigest(name)
 		})
 	}
 
+	scheduler.StartAsync()
 }
 
 // createDigest generates and stores a new digest
