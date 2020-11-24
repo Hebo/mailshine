@@ -117,7 +117,7 @@
             </a>
           </div>
           <div class="item-subhead">
-            <a href="{{.CommentsLink}}">{{.NumComments}} comments</a> • {{.Subreddit}} • {{.Hostname}}</div>
+            <a href="{{.CommentsLink}}">{{.NumComments}} comments</a> • {{trimWww .Hostname}}</div>
         </div>
       </li>
       {{end}}

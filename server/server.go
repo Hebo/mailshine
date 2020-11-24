@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -159,8 +161,15 @@ func (s Server) GetPreviewRSS(w http.ResponseWriter, r *http.Request, ps httprou
 
 const feedRSSTemplate = "server/digest.gotmpl"
 
+// renderDigest renders the HTML representation of a digest
+// TODO: Load the templates once in initialization, instead of every render
 func renderDigest(digest models.Digest, baseURL string) string {
-	t, err := template.ParseFiles(feedRSSTemplate)
+	t, err := template.New(path.Base(feedRSSTemplate)).Funcs(
+		template.FuncMap{
+			"trimWww": func(s string) string {
+				return strings.TrimPrefix(s, "www.")
+			},
+		}).ParseFiles(feedRSSTemplate)
 	if err != nil {
 		log.Printf("Failed to parse template: %s", err)
 	}

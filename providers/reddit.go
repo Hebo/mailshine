@@ -26,8 +26,7 @@ func NewRedditClient(clientID, clientSecret string) (RedditClient, error) {
 		return client, errors.New("missing client ID or client secret")
 	}
 
-	err := client.GetToken()
-	return client, err
+	return client, nil
 }
 
 // RedditClient interfaces with reddit

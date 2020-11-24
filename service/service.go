@@ -52,7 +52,7 @@ func (s Service) StartScheduler() {
 		}
 
 		n := name
-		fmt.Printf("Scheduling %q\n", n)
+		log.Printf("Scheduling %q\n", n)
 		scheduler.Every(1).Day().At("7:45").Do(func() {
 			log.Printf("Scheduler triggered for %q\n", n)
 			s.createDigest(n)
