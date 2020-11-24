@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/hebo/mailshine/models"
 )
@@ -31,11 +32,31 @@ func NewRedditClient(clientID, clientSecret string) (RedditClient, error) {
 
 // RedditClient interfaces with reddit
 type RedditClient struct {
-	accessToken  accessTokenResponse
-	clientID     string
-	clientSecret string
+	accessToken          accessTokenResponse
+	accessTokenExpiresAt time.Time
+	clientID             string
+	clientSecret         string
 }
 
+const tokenGracePeriod = 30 * time.Second
+
+func (r *RedditClient) authenticate() error {
+	needsToken := false
+	if r.accessTokenExpiresAt.IsZero() {
+		log.Println("Token unset, fetching a new one")
+		needsToken = true
+	} else if time.Now().After(r.accessTokenExpiresAt.Add(-tokenGracePeriod)) {
+		log.Println("Token has expired, fetching a new one")
+		needsToken = true
+	}
+
+	if needsToken {
+		return r.GetToken()
+	}
+	return nil
+}
+
+// GetToken fetches and stores an access token
 func (r *RedditClient) GetToken() error {
 	form := url.Values{}
 	form.Add("grant_type", "client_credentials")
@@ -60,17 +81,21 @@ func (r *RedditClient) GetToken() error {
 		return err
 	}
 
-	fmt.Printf("Token Stored -> %#v\n", token)
 	r.accessToken = token
+	r.accessTokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
+	log.Println("Token Stored", token)
 	return nil
 }
 
-func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (listingResponse, error) {
-	if r.accessToken.AccessToken == "" {
-		panic("no access token")
+// FetchSubreddit fetches info for a subreddit
+func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (RedditListingResponse, error) {
+	listingRes := RedditListingResponse{}
+
+	err := r.authenticate()
+	if err != nil {
+		return listingRes, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	listingRes := listingResponse{}
 	baseURL, err := url.Parse("https://oauth.reddit.com/")
 	if err != nil {
 		fmt.Println("Malformed URL: ", err.Error())
@@ -114,7 +139,7 @@ func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (lis
 const redditBaseURL = "https://old.reddit.com"
 
 // ToBlock converts to a block
-func (l listingResponse) ToBlock(title string) models.Block {
+func (l RedditListingResponse) ToBlock(title string) models.Block {
 	commentsURL, err := url.Parse(redditBaseURL)
 	if err != nil {
 		log.Fatal(err)
@@ -145,7 +170,7 @@ func (l listingResponse) ToBlock(title string) models.Block {
 	return block
 }
 
-type listingResponse struct {
+type RedditListingResponse struct {
 	Kind string `json:"kind"`
 	Data struct {
 		Modhash  string `json:"modhash"`

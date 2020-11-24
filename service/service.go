@@ -42,7 +42,7 @@ func (s Service) StartScheduler() {
 	for name := range s.feeds {
 		count, err := s.db.CountDigestsByFeed(name)
 		if err != nil {
-			log.Printf("Failed to get digest count: %s", err)
+			log.Printf("Failed to get digest count: %s\n", err)
 			continue
 		}
 
@@ -51,9 +51,11 @@ func (s Service) StartScheduler() {
 			s.createDigest(name)
 		}
 
-		scheduler.Every(1).Day().At("8:40").Do(func() {
-			log.Printf("Scheduler triggered for %q\n", name)
-			s.createDigest(name)
+		n := name
+		fmt.Printf("Scheduling %q\n", n)
+		scheduler.Every(1).Day().At("7:45").Do(func() {
+			log.Printf("Scheduler triggered for %q\n", n)
+			s.createDigest(n)
 		})
 	}
 
@@ -91,7 +93,7 @@ func (s Service) createDigest(feedName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert feed: %s", err)
 	}
-	log.Printf("Inserted feed: %q\n", feedName)
+	log.Printf("Inserted feed %q: %s\n", feedName, dg.Title)
 	return nil
 }
 
