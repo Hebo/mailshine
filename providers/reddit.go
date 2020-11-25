@@ -50,13 +50,13 @@ func (r *RedditClient) authenticate() error {
 	}
 
 	if needsToken {
-		return r.GetToken()
+		return r.getToken()
 	}
 	return nil
 }
 
-// GetToken fetches and stores an access token
-func (r *RedditClient) GetToken() error {
+// getToken fetches and stores an access token
+func (r *RedditClient) getToken() error {
 	form := url.Values{}
 	form.Add("grant_type", "client_credentials")
 	form.Add("device_id", "3v4b553")
@@ -88,7 +88,6 @@ func (r *RedditClient) GetToken() error {
 // FetchSubreddit fetches info for a subreddit
 func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (RedditListingResponse, error) {
 	listingRes := RedditListingResponse{}
-
 	err := r.authenticate()
 	if err != nil {
 		return listingRes, fmt.Errorf("failed to get token: %w", err)
@@ -108,15 +107,13 @@ func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (Red
 	params.Add("limit", strconv.Itoa(numStories))
 	params.Add("raw_json", "1")
 
-	// Add Query Parameters to the URL
-	baseURL.RawQuery = params.Encode() // Escape Query Parameters
-
-	fmt.Printf("Encoded URL is %q\n", baseURL.String())
+	baseURL.RawQuery = params.Encode()
 
 	req, _ := http.NewRequest("GET", baseURL.String(), nil)
 	req.Header.Add("User-agent", "mailshine/v0.1")
 	req.Header.Add("Authorization", fmt.Sprintf("bearer %s", r.AccessToken))
 
+	log.Printf("Making request to %q\n", baseURL.String())
 	cli := &http.Client{}
 	resp, err := cli.Do(req)
 	if err != nil {
@@ -168,6 +165,7 @@ func (l RedditListingResponse) ToBlock(title string) models.Block {
 	return block
 }
 
+// RedditListingResponse is the response from a subreddit listing
 type RedditListingResponse struct {
 	Kind string `json:"kind"`
 	Data struct {
