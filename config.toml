@@ -6,9 +6,9 @@ reddits = ["games", "pcgaming"]
 num_items = 10
 schedule = "45 7 * * *" # https://crontab.guru/#45_7_*_*_*
 
-[feeds."pcgaming"] # Canonical Feed Name
-title = "PC Gaming" # For Display -- Title of each Digest
-reddits = ["pcgaming"]
-num_items = 20
-schedule = "45 7 * * *"
+[feeds."local"] # Canonical Feed Name
+title = "Local" # For Display -- Title of each Digest
+reddits = ["sanfrancisco", "bayarea", "asksf"]
+num_items = 6
+schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
