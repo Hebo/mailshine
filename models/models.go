@@ -32,12 +32,12 @@ type ContentBlocks []Block
 func (c ContentBlocks) Value() (driver.Value, error) {
 	matched := true
 	if !matched {
-		return driver.Value(""), fmt.Errorf("Number '%s' not a valid PhoneNumber format.", c)
+		return driver.Value(""), fmt.Errorf("number '%s' not a valid PhoneNumber format", c)
 	}
 
 	marshalled, err := json.Marshal(c)
 	if err != nil {
-		return driver.Value(""), fmt.Errorf("Failed to marshal json: %e", err)
+		return driver.Value(""), fmt.Errorf("failed to marshal json: %e", err)
 	}
 
 	return driver.Value(marshalled), nil
@@ -46,13 +46,13 @@ func (c ContentBlocks) Value() (driver.Value, error) {
 func (c *ContentBlocks) Scan(src interface{}) error {
 	var source []byte
 	// let's support string and []byte
-	switch src.(type) {
+	switch src := src.(type) {
 	case string:
-		source = []byte(src.(string))
+		source = []byte(src)
 	case []byte:
-		source = src.([]byte)
+		source = src
 	default:
-		return errors.New("Incompatible type for GzippedText")
+		return errors.New("incompatible type for ContentBlocks")
 	}
 	// fmt.Printf("Scanned: %s \n", source)
 	err := json.Unmarshal(source, &c)

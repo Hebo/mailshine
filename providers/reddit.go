@@ -9,15 +9,11 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hebo/mailshine/models"
 )
-
-type accessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
-}
 
 // NewRedditClient creates a new RedditClient
 func NewRedditClient(clientID, clientSecret string) (*RedditClient, error) {
@@ -31,32 +27,51 @@ func NewRedditClient(clientID, clientSecret string) (*RedditClient, error) {
 
 // RedditClient interfaces with reddit
 type RedditClient struct {
-	AccessToken          string
-	accessTokenExpiresAt time.Time
-	clientID             string
-	clientSecret         string
+	clientID     string
+	clientSecret string
+	mu           sync.Mutex // guards t
+	t            accessToken
+}
+
+type accessToken struct {
+	Token     string
+	ExpiresAt time.Time
+}
+
+type accessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
 }
 
 const tokenGracePeriod = 30 * time.Second
 
-func (r *RedditClient) authenticate() error {
+// token returns an access token, and fetches a new one if necessary
+func (r *RedditClient) token() (accessToken, error) {
 	needsToken := false
-	if r.accessTokenExpiresAt.IsZero() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.t.ExpiresAt.IsZero() {
 		log.Println("Access Token unset, fetching a new one")
 		needsToken = true
-	} else if time.Now().After(r.accessTokenExpiresAt.Add(-tokenGracePeriod)) {
+	} else if time.Now().After(r.t.ExpiresAt.Add(-tokenGracePeriod)) {
 		log.Println("Access Token has expired, fetching a new one")
 		needsToken = true
 	}
 
 	if needsToken {
-		return r.getToken()
+		token, err := r.fetchAccessToken()
+		if err != nil {
+			return r.t, err
+		}
+
+		r.t = token
 	}
-	return nil
+
+	return r.t, nil
 }
 
-// getToken fetches and stores an access token
-func (r *RedditClient) getToken() error {
+// fetchAccessToken fetches an accessToken
+func (r *RedditClient) fetchAccessToken() (accessToken, error) {
 	form := url.Values{}
 	form.Add("grant_type", "client_credentials")
 	form.Add("device_id", "3v4b553")
@@ -65,8 +80,6 @@ func (r *RedditClient) getToken() error {
 	req.SetBasicAuth(r.clientID, r.clientSecret)
 	req.Header.Add("User-agent", "mailshine/v0.1")
 
-	fmt.Println(req.PostForm.Encode())
-
 	cli := &http.Client{}
 	resp, err := cli.Do(req)
 	if err != nil {
@@ -74,21 +87,22 @@ func (r *RedditClient) getToken() error {
 	}
 	defer resp.Body.Close()
 
-	token := accessTokenResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&token)
+	res := accessTokenResponse{}
+	tok := accessToken{}
+	err = json.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
-		return err
+		return tok, err
 	}
 
-	r.AccessToken = token.AccessToken
-	r.accessTokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
-	return nil
+	tok.Token = res.AccessToken
+	tok.ExpiresAt = time.Now().Add(time.Duration(res.ExpiresIn) * time.Second)
+	return tok, nil
 }
 
 // FetchSubreddit fetches info for a subreddit
 func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (RedditListingResponse, error) {
 	listingRes := RedditListingResponse{}
-	err := r.authenticate()
+	token, err := r.token()
 	if err != nil {
 		return listingRes, fmt.Errorf("failed to get token: %w", err)
 	}
@@ -111,7 +125,7 @@ func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (Red
 
 	req, _ := http.NewRequest("GET", baseURL.String(), nil)
 	req.Header.Add("User-agent", "mailshine/v0.1")
-	req.Header.Add("Authorization", fmt.Sprintf("bearer %s", r.AccessToken))
+	req.Header.Add("Authorization", fmt.Sprintf("bearer %s", token.Token))
 
 	log.Printf("Making request to %q\n", baseURL.String())
 	cli := &http.Client{}

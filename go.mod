@@ -16,4 +16,5 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/pelletier/go-toml v1.8.1
 	gopkg.in/yaml.v2 v2.2.8 // indirect
+	honnef.co/go/tools v0.0.1-2020.1.6 // indirect
 )
