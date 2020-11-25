@@ -1,10 +1,8 @@
-// +heroku goVersion go1.15
 module github.com/hebo/mailshine
 
 go 1.15
 
 require (
-	github.com/go-co-op/gocron v0.3.3
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/gorilla/feeds v1.1.1
 	github.com/gorilla/handlers v1.5.1
@@ -15,6 +13,5 @@ require (
 	github.com/lib/pq v1.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/pelletier/go-toml v1.8.1
-	gopkg.in/yaml.v2 v2.2.8 // indirect
-	honnef.co/go/tools v0.0.1-2020.1.6 // indirect
+	github.com/robfig/cron/v3 v3.0.2-0.20200518143530-6a8421bcff44
 )

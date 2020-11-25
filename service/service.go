@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/go-co-op/gocron"
 	"github.com/hebo/mailshine/models"
 	"github.com/hebo/mailshine/providers"
+	"github.com/robfig/cron/v3"
 )
 
 type Service struct {
@@ -31,15 +31,13 @@ const timezone = "America/Los_Angeles"
 
 // StartScheduler begins scheduling for Digest generation
 func (s Service) StartScheduler() error {
-
 	loc, err := time.LoadLocation(timezone) // use other time zones such as MST, IST
 	if err != nil {
 		log.Fatalln("failed to get timezone: ", err)
 	}
 
-	scheduler := gocron.NewScheduler(loc)
-
-	for name := range s.feeds {
+	scheduler := cron.New(cron.WithLocation(loc))
+	for name, conf := range s.feeds {
 		count, err := s.db.CountDigestsByFeed(name)
 		if err != nil {
 			log.Printf("Failed to get digest count: %s\n", err)
@@ -53,7 +51,7 @@ func (s Service) StartScheduler() error {
 
 		n := name
 		log.Printf("Scheduling %q\n", n)
-		_, err = scheduler.Every(1).Day().At("7:45").Do(func() {
+		_, err = scheduler.AddFunc(conf.Schedule, func() {
 			log.Printf("Scheduler triggered for %q\n", n)
 			s.createDigest(n)
 		})
@@ -62,7 +60,7 @@ func (s Service) StartScheduler() error {
 		}
 	}
 
-	scheduler.StartAsync()
+	scheduler.Start()
 	return nil
 }
 
