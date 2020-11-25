@@ -58,7 +58,7 @@ func main() {
 		return
 	}
 
-	server := server.NewServer(db, conf.FeedConfigs, conf.BaseURL)
+	server := server.New(db, conf.FeedConfigs, conf.BaseURL)
 	server.Serve(*flagPort)
 }
 

@@ -18,7 +18,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// Server handles rendering RSS and info for feeds
+// Server handles RSS and other HTTP routes
 type Server struct {
 	Feeds   models.FeedConfigMap
 	router  *httprouter.Router
@@ -26,8 +26,8 @@ type Server struct {
 	baseURL string
 }
 
-// NewServer creates a new server
-func NewServer(db models.DB, feeds models.FeedConfigMap, baseURL string) Server {
+// New creates a new Server
+func New(db models.DB, feeds models.FeedConfigMap, baseURL string) Server {
 	srv := Server{
 		Feeds:   feeds,
 		db:      db,
