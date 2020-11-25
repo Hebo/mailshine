@@ -6,9 +6,21 @@ reddits = ["games", "pcgaming"]
 num_items = 10
 schedule = "45 7 * * *" # https://crontab.guru/#45_7_*_*_*
 
-[feeds."local"] # Canonical Feed Name
-title = "Local" # For Display -- Title of each Digest
+[feeds."local"]
+title = "Local"
 reddits = ["sanfrancisco", "bayarea", "asksf"]
+num_items = 6
+schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
+
+[feeds."tv"]
+title = "TV & Books"
+reddits = ["fantasy", "books", "printsf", "television", "movies"]
+num_items = 6
+schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
+
+[feeds."recomendations"]
+title = "Recommendations"
+reddits = ["shortcuts", "podcasts", "suggestmeabook"]
 num_items = 6
 schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
