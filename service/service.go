@@ -30,7 +30,7 @@ func NewService(db models.DB, fc models.FeedConfigMap, reddit *providers.RedditC
 const timezone = "America/Los_Angeles"
 
 // StartScheduler begins scheduling for Digest generation
-func (s Service) StartScheduler() {
+func (s Service) StartScheduler() error {
 
 	loc, err := time.LoadLocation(timezone) // use other time zones such as MST, IST
 	if err != nil {
@@ -53,13 +53,17 @@ func (s Service) StartScheduler() {
 
 		n := name
 		log.Printf("Scheduling %q\n", n)
-		scheduler.Every(1).Day().At("7:45").Do(func() {
+		_, err = scheduler.Every(1).Day().At("7:45").Do(func() {
 			log.Printf("Scheduler triggered for %q\n", n)
 			s.createDigest(n)
 		})
+		if err != nil {
+			return fmt.Errorf("failed to schedule job: %w", err)
+		}
 	}
 
 	scheduler.StartAsync()
+	return nil
 }
 
 // createDigest generates and stores a new digest

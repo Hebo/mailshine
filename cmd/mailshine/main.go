@@ -48,7 +48,10 @@ func main() {
 	}
 
 	svc := service.NewService(db, conf.FeedConfigs, reddit)
-	svc.StartScheduler()
+	err = svc.StartScheduler()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	if *flagGenFeeds {
 		svc.CreateAllDigests()
