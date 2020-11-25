@@ -13,11 +13,11 @@ import (
 type Service struct {
 	db           models.DB
 	feeds        models.FeedConfigMap
-	redditClient providers.RedditClient
+	redditClient *providers.RedditClient
 }
 
 // NewService creates a new Service
-func NewService(db models.DB, fc models.FeedConfigMap, reddit providers.RedditClient) Service {
+func NewService(db models.DB, fc models.FeedConfigMap, reddit *providers.RedditClient) Service {
 	svc := Service{
 		db:           db,
 		feeds:        fc,

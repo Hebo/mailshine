@@ -20,8 +20,8 @@ type accessTokenResponse struct {
 }
 
 // NewRedditClient creates a new RedditClient
-func NewRedditClient(clientID, clientSecret string) (RedditClient, error) {
-	client := RedditClient{clientID: clientID, clientSecret: clientSecret}
+func NewRedditClient(clientID, clientSecret string) (*RedditClient, error) {
+	client := &RedditClient{clientID: clientID, clientSecret: clientSecret}
 	if clientID == "" || clientSecret == "" {
 		return client, errors.New("missing client ID or client secret")
 	}
@@ -31,7 +31,7 @@ func NewRedditClient(clientID, clientSecret string) (RedditClient, error) {
 
 // RedditClient interfaces with reddit
 type RedditClient struct {
-	accessToken          accessTokenResponse
+	AccessToken          string
 	accessTokenExpiresAt time.Time
 	clientID             string
 	clientSecret         string
@@ -42,10 +42,10 @@ const tokenGracePeriod = 30 * time.Second
 func (r *RedditClient) authenticate() error {
 	needsToken := false
 	if r.accessTokenExpiresAt.IsZero() {
-		log.Println("Token unset, fetching a new one")
+		log.Println("Access Token unset, fetching a new one")
 		needsToken = true
 	} else if time.Now().After(r.accessTokenExpiresAt.Add(-tokenGracePeriod)) {
-		log.Println("Token has expired, fetching a new one")
+		log.Println("Access Token has expired, fetching a new one")
 		needsToken = true
 	}
 
@@ -80,9 +80,8 @@ func (r *RedditClient) GetToken() error {
 		return err
 	}
 
-	r.accessToken = token
+	r.AccessToken = token.AccessToken
 	r.accessTokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
-	log.Println("Token Stored", token)
 	return nil
 }
 
@@ -116,7 +115,7 @@ func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (Red
 
 	req, _ := http.NewRequest("GET", baseURL.String(), nil)
 	req.Header.Add("User-agent", "mailshine/v0.1")
-	req.Header.Add("Authorization", fmt.Sprintf("bearer %s", r.accessToken.AccessToken))
+	req.Header.Add("Authorization", fmt.Sprintf("bearer %s", r.AccessToken))
 
 	cli := &http.Client{}
 	resp, err := cli.Do(req)
