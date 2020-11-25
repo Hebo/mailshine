@@ -13,9 +13,9 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-const (
+var (
 	configFilename = "config.toml"
-	dbFilename     = "./shine.db"
+	dbPath         = "./shine.db"
 )
 
 func main() {
@@ -24,15 +24,10 @@ func main() {
 	flagPort := flag.Int("port", 8080, "Listen port")
 	flag.Parse()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: Could not load '.env' file")
-	}
-
 	conf := loadConfig()
 	log.Printf("Config loaded - %d feed configs found\n", len(conf.FeedConfigs))
 
-	db, err := models.NewDB(dbFilename)
+	db, err := models.NewDB(dbPath)
 	if err != nil {
 		log.Fatalln("could not get db", err)
 	}
@@ -45,7 +40,8 @@ func main() {
 		return
 	}
 
-	reddit, err := providers.NewRedditClient(os.Getenv("REDDIT_CLIENT_ID"),
+	reddit, err := providers.NewRedditClient(
+		os.Getenv("REDDIT_CLIENT_ID"),
 		os.Getenv("REDDIT_CLIENT_SECRET"))
 	if err != nil {
 		log.Fatalf("Failed to create reddit client: %s", err)
@@ -84,6 +80,15 @@ func loadConfig() config {
 		if err != nil {
 			log.Fatalf("Invalid config: %s\n", err)
 		}
+	}
+
+	err = godotenv.Load()
+	if err != nil {
+		log.Println("Warning: Could not load '.env' file")
+	}
+
+	if os.Getenv("DB_PATH") != "" {
+		dbPath = os.Getenv("DB_PATH")
 	}
 
 	return fc

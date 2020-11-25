@@ -2,6 +2,8 @@ package models
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -20,8 +22,19 @@ CREATE TABLE digests (
 func NewDB(filename string) (DB, error) {
 	database := DB{}
 	var err error
+	log.Printf("Connecting to database %q", filename)
+	if _, err := os.Stat(filename); err == nil {
+		database.db, err = sqlx.Connect("sqlite3", filename)
+		return database, err
+	}
+
+	log.Println("Database does not exist, initializing schema")
 	database.db, err = sqlx.Connect("sqlite3", filename)
-	return database, err
+	if err != nil {
+		return database, err
+	}
+
+	return database, database.InitializeSchema()
 }
 
 // DB holds the database. Don't drop it

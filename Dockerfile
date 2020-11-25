@@ -20,6 +20,11 @@ WORKDIR /app
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /app/ /app/
 
+ARG DATA_DIR=/data
+RUN mkdir -p ${DATA_DIR}
+ENV DB_PATH=${DATA_DIR}/shine.db
+
 EXPOSE 8000
-RUN ["/app/mailshine","-init"]
+
+VOLUME ["/data"]
 ENTRYPOINT ["/app/mailshine", "-port", "8000"]
