@@ -72,6 +72,12 @@ func (d *DB) GetDigestsByFeed(name string) ([]Digest, error) {
 	return digests, err
 }
 
+func (d *DB) GetDigestByID(id string) (Digest, error) {
+	digest := Digest{}
+	err := d.db.Get(&digest, "SELECT * FROM digests WHERE id=$1", id)
+	return digest, err
+}
+
 func (d *DB) CountDigestsByFeed(name string) (int, error) {
 	var count int
 	err := d.db.Get(&count, "SELECT count(*) FROM digests WHERE feed_name=$1", name)

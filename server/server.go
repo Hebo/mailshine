@@ -38,7 +38,7 @@ func New(db models.DB, feeds models.FeedConfigMap, baseURL string) Server {
 	router.GET("/", Index)
 	router.GET("/feeds/:name", srv.GetFeed)
 	router.GET("/feeds/:name/rss", srv.GetFeedRSS)
-	router.GET("/feeds/:name/preview", srv.GetPreviewRSS)
+	router.GET("/feeds/:name/digests/:digest_id", srv.GetDigest)
 
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 
@@ -61,7 +61,11 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
 }
 
-const feedTemplate = "server/get_feed.gotmpl"
+const templateGetFeed = "server/get_feed.gotmpl"
+
+func digestURL(baseURL, feedName string, digestID int) string {
+	return fmt.Sprintf("%s/feeds/%s/digests/%d", baseURL, feedName, digestID)
+}
 
 // GetFeed returns useful info about a feed
 func (s Server) GetFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -72,9 +76,14 @@ func (s Server) GetFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 		return
 	}
 
-	t, err := template.ParseFiles(feedTemplate)
+	t, err := template.New(path.Base(templateGetFeed)).Funcs(
+		template.FuncMap{
+			"digestURL": func(feedName string, digestID int) string {
+				return digestURL(s.baseURL, feedName, digestID)
+			},
+		}).ParseFiles(templateGetFeed)
 	if err != nil {
-		panic(err)
+		log.Printf("Failed to parse template: %s", err)
 	}
 
 	digests, err := s.db.GetDigestsByFeed(feedName)
@@ -90,7 +99,7 @@ func (s Server) GetFeed(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 
 	err = t.Execute(w, data)
 	if err != nil {
-		panic(err)
+		log.Printf("Failed to render: %s", err)
 	}
 }
 
@@ -114,62 +123,56 @@ func (s Server) GetFeedRSS(w http.ResponseWriter, r *http.Request, ps httprouter
 		Title:       fmt.Sprintf("Mailshine - %s", s.Feeds[feedName].Title),
 		Link:        &feeds.Link{Href: "http://localhost:8080/feeds/" + feedName + "/rss"},
 		Description: "cool feed with cooler content",
-		// Author:      &feeds.Author{Name: "Jason Moiron", Email: "jmoiron@jmoiron.net"},
-		Created: now,
+		Created:     now,
 	}
 
 	for _, digest := range digests {
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title:       digest.Title,
-			Link:        &feeds.Link{Href: "http://jmoiron.net/blog/limiting-concurrency-in-go/"},
+			Link:        &feeds.Link{Href: digestURL(s.baseURL, digest.FeedName, digest.ID)},
 			Description: renderDigest(digest, s.baseURL),
-			// Author:      &feeds.Author{Name: "Jason Moiron", Email: "jmoiron@jmoiron.net"},
-			Created: digest.CreatedAt,
+			Created:     digest.CreatedAt,
 		})
 	}
 
 	rss, err := feed.ToRss()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Failed to render: %s", err)
 	}
 
 	w.Write([]byte(rss))
 }
 
-// GetPreviewRSS previews the HTML description for a feed
-func (s Server) GetPreviewRSS(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// GetDigest shows a single digest
+func (s Server) GetDigest(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	feedName := ps.ByName("name")
+	digestID := ps.ByName("digest_id")
 
 	if _, ok := s.Feeds[feedName]; !ok {
 		http.Error(w, fmt.Sprintf("Not Found: Couldn't find feed %q", feedName), http.StatusUnauthorized)
 		return
 	}
 
-	digests, err := s.db.GetDigestsByFeed(feedName)
+	digest, err := s.db.GetDigestByID(digestID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error: Failed to get digests: %s", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error: Failed to get digest: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	if len(digests) == 0 {
-		http.Error(w, ("Error: No digests found to preview"), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write([]byte(renderDigest(digests[0], s.baseURL)))
+	w.Write([]byte(renderDigest(digest, s.baseURL)))
 }
 
-const feedRSSTemplate = "server/digest.gotmpl"
+const templateDigest = "server/digest.gotmpl"
 
 // renderDigest renders the HTML representation of a digest
 // TODO: Load the templates once in initialization, instead of every render
 func renderDigest(digest models.Digest, baseURL string) string {
-	t, err := template.New(path.Base(feedRSSTemplate)).Funcs(
+	t, err := template.New(path.Base(templateDigest)).Funcs(
 		template.FuncMap{
 			"trimWww": func(s string) string {
 				return strings.TrimPrefix(s, "www.")
 			},
-		}).ParseFiles(feedRSSTemplate)
+		}).ParseFiles(templateDigest)
 	if err != nil {
 		log.Printf("Failed to parse template: %s", err)
 	}

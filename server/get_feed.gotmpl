@@ -14,10 +14,14 @@
 <body>
   <h2>Feed "{{.Name}}"</h2>
 
-  <h4>Available Digests (<a href="/feeds/{{$.Name}}/preview">preview</a>):</h4>
+  <p>
+    <a href="/feeds/{{$.Name}}/rss">➡ RSS Link for your Feed Reader</a>
+  </p>
+
+  <h4>Available Digests:</h4>
   <ul>
     {{range .Digests}}
-    <li><b>{{.ID}}</b> - <a href="/feeds/{{$.Name}}/rss">{{.Title}}</a> - {{ printf "%s" .Content}}</li>
+    <li><b>{{.ID}}</b> - <a href="{{digestURL $.Name .ID}}">{{.Title}}</a> - {{ printf "%s" .Content}}</li>
     {{end}}
   </ul>
 
