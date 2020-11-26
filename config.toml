@@ -24,3 +24,9 @@ reddits = ["shortcuts", "podcasts", "suggestmeabook"]
 num_items = 6
 schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
+[feeds."code"]
+title = "Programming"
+reddits = ["python", "golang", "programming"]
+num_items = 5
+schedule = "0 8 * * 1,4" # https://crontab.guru/#0_8_*_*_1,4
+
