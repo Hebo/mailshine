@@ -3,13 +3,13 @@ package server
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/gorilla/feeds"
@@ -172,6 +172,7 @@ func renderDigest(digest models.Digest, baseURL string) string {
 			"trimWww": func(s string) string {
 				return strings.TrimPrefix(s, "www.")
 			},
+			"trunc": models.Truncate,
 		}).ParseFiles(templateDigest)
 	if err != nil {
 		log.Printf("Failed to parse template: %s", err)

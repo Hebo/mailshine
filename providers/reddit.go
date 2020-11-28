@@ -172,6 +172,7 @@ func (l RedditListingResponse) ToBlock(title string) models.Block {
 			CommentsLink: commentsURL.String(),
 			NumComments:  post.Data.NumComments,
 			Subreddit:    "r/" + post.Data.Subreddit,
+			Text:         post.Data.Selftext,
 		}
 		block.Stories = append(block.Stories, story)
 	}
@@ -250,7 +251,7 @@ type RedditListingResponse struct {
 				AuthorFlairType     string      `json:"author_flair_type"`
 				Domain              string      `json:"domain"`
 				AllowLiveComments   bool        `json:"allow_live_comments"`
-				SelftextHTML        interface{} `json:"selftext_html"`
+				SelftextHTML        string      `json:"selftext_html"`
 				Likes               interface{} `json:"likes"`
 				SuggestedSort       interface{} `json:"suggested_sort"`
 				BannedAtUtc         interface{} `json:"banned_at_utc"`

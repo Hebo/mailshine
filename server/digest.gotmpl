@@ -12,7 +12,6 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      /* font-family: niveau-grotesk, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; */
     }
 
     h1 {
@@ -59,6 +58,10 @@
       vertical-align: middle;
     }
 
+    .selftext {
+      font-size: 0.9rem;
+      margin-top: 1em;
+    }
 
     .item-title {
       font-weight: 600;
@@ -118,6 +121,11 @@
           </div>
           <div class="item-subhead">
             <a href="{{.CommentsLink}}">{{.NumComments}} comments</a> • {{trimWww .Hostname}}</div>
+
+          {{if ne .Text ""}}
+          <div class="selftext">{{trunc .Text 500}}</div>
+          {{end}}
+
         </div>
       </li>
       {{end}}

@@ -18,6 +18,7 @@ type Story struct {
 	CommentsLink string
 	NumComments  int
 	Subreddit    string
+	Text         string
 }
 
 // Block is a collection of stories. In the future, a digest may have multiple blocks.
@@ -54,20 +55,11 @@ func (c *ContentBlocks) Scan(src interface{}) error {
 	default:
 		return errors.New("incompatible type for ContentBlocks")
 	}
-	// fmt.Printf("Scanned: %s \n", source)
 	err := json.Unmarshal(source, &c)
 	if err != nil {
-		// *g = []Block{Block{Title: "r/gaming", Stories: []Story{{Title: "whoa champ"}}}}
 		return err
 	}
 
-	// reader, _ := gzip.NewReader(bytes.NewReader(source))
-	// defer reader.Close()
-	// b, err := ioutil.ReadAll(source)
-	// if err != nil {
-	// 	return err
-	// }
-	// *g = []Block{Block{Title: "r/gaming", Stories: []Story{{Title: "whoa champ"}}}}
 	return nil
 }
 
@@ -91,10 +83,11 @@ func (c ContentBlocks) String() string {
 
 	}
 
-	return fmt.Sprintf("<%d Stories - %q>", storyCount, truncate(previewStory, 20))
+	return fmt.Sprintf("<%d Stories - %q>", storyCount, Truncate(previewStory, 20))
 }
 
-func truncate(s string, length int) string {
+// Truncate truncates a string
+func Truncate(s string, length int) string {
 	if len(s) <= length {
 		return s
 	}
