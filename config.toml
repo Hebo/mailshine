@@ -4,29 +4,34 @@ base_url = "https://mailshine.salt.gg"
 title = "Games" # For Display -- Title of each Digest
 reddits = ["games", "pcgaming"]
 num_items = 10
+time_period = "day"
 schedule = "45 7 * * *" # https://crontab.guru/#45_7_*_*_*
 
 [feeds."local"]
 title = "Local"
 reddits = ["sanfrancisco", "bayarea", "asksf"]
 num_items = 6
+time_period = "week"
 schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
 [feeds."tv"]
 title = "TV & Books"
 reddits = ["fantasy", "books", "printsf", "television", "movies"]
 num_items = 6
+time_period = "week"
 schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
 [feeds."recs"]
 title = "Recommendations"
 reddits = ["shortcuts", "podcasts", "suggestmeabook"]
 num_items = 6
+time_period = "week"
 schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
 
 [feeds."code"]
 title = "Programming"
 reddits = ["python", "golang", "programming"]
 num_items = 5
+time_period = "week"
 schedule = "0 8 * * 1,4" # https://crontab.guru/#0_8_*_*_1,4
 

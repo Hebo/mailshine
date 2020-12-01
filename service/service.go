@@ -82,7 +82,8 @@ func (s Service) createDigest(feedName string) error {
 	}
 
 	for _, subreddit := range feedConf.Reddits {
-		listing, err := s.redditClient.FetchSubreddit(subreddit, feedConf.NumItems)
+		listing, err := s.redditClient.FetchSubreddit(
+			subreddit, feedConf.TimePeriod, feedConf.NumItems)
 		if err != nil {
 			return fmt.Errorf("fetch subreddit %q: %w", subreddit, err)
 		}

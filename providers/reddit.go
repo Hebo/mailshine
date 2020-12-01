@@ -100,7 +100,7 @@ func (r *RedditClient) fetchAccessToken() (accessToken, error) {
 }
 
 // FetchSubreddit fetches info for a subreddit
-func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (RedditListingResponse, error) {
+func (r *RedditClient) FetchSubreddit(subredditName, period string, numStories int) (RedditListingResponse, error) {
 	listingRes := RedditListingResponse{}
 	token, err := r.token()
 	if err != nil {
@@ -117,7 +117,7 @@ func (r *RedditClient) FetchSubreddit(subredditName string, numStories int) (Red
 
 	// Prepare Query Parameters
 	params := url.Values{}
-	params.Add("t", "day")
+	params.Add("t", period)
 	params.Add("limit", strconv.Itoa(numStories))
 	params.Add("raw_json", "1")
 
