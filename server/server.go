@@ -35,8 +35,10 @@ func New(db models.DB, feeds models.FeedConfigMap, baseURL string) Server {
 	}
 
 	router := httprouter.New()
+
 	router.GET("/", Index)
 	router.GET("/feeds/:name", srv.GetFeed)
+	router.GET("/feeds/:name/", srv.GetFeed)
 	router.GET("/feeds/:name/rss", srv.GetFeedRSS)
 	router.GET("/feeds/:name/digests/:digest_id", srv.GetDigest)
 
