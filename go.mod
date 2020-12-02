@@ -14,4 +14,5 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/pelletier/go-toml v1.8.1
 	github.com/robfig/cron/v3 v3.0.2-0.20200518143530-6a8421bcff44
+	github.com/stretchr/testify v1.6.1
 )

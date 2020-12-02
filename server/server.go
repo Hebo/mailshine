@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -174,7 +175,8 @@ func renderDigest(digest models.Digest, baseURL string) string {
 			"trimWww": func(s string) string {
 				return strings.TrimPrefix(s, "www.")
 			},
-			"trunc": models.Truncate,
+			"trunc":      models.Truncate,
+			"apolloLink": apolloURLHelper,
 		}).ParseFiles(templateDigest)
 	if err != nil {
 		log.Printf("Failed to parse template: %s", err)
@@ -192,4 +194,10 @@ func renderDigest(digest models.Digest, baseURL string) string {
 	}
 
 	return buff.String()
+}
+
+func apolloURLHelper(s string) template.URL {
+	u, _ := url.Parse(s)
+	u.Scheme = "apollo"
+	return template.URL(u.String())
 }

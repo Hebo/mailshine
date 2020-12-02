@@ -120,7 +120,7 @@
             </a>
           </div>
           <div class="item-subhead">
-            <a href="{{.CommentsLink}}">{{.NumComments}} comments</a> • {{trimWww .Hostname}}</div>
+            <a href="{{apolloLink .CommentsLink}}">{{.NumComments}} comments</a> | <a href="{{.CommentsLink}}">web</a> • {{trimWww .Hostname}}</div>
 
           {{if ne .Text ""}}
           <div class="selftext">{{trunc .Text 500}}</div>
