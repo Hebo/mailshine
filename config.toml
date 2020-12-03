@@ -35,3 +35,10 @@ num_items = 5
 time_period = "week"
 schedule = "0 8 * * 1,4" # https://crontab.guru/#0_8_*_*_1,4
 
+[feeds."apps"]
+title = "Selfhosted"
+reddits = ["plex", "usenet", "radarr+sonarr"]
+num_items = 5
+time_period = "week"
+schedule = "0 8 * * 6" # https://crontab.guru/#0_8_*_*_6
+
