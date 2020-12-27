@@ -64,10 +64,10 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
 }
 
-const templateGetFeed = "server/get_feed.gotmpl"
+const templateGetFeed = "server/get_feed.html"
 
 func digestURL(baseURL, feedName string, digestID int) string {
-	return fmt.Sprintf("%s/feeds/%s/digests/%d", baseURL, feedName, digestID)
+	return fmt.Sprintf("/feeds/%s/digests/%d", feedName, digestID)
 }
 
 // GetFeed returns useful info about a feed
@@ -165,7 +165,7 @@ func (s Server) GetDigest(w http.ResponseWriter, r *http.Request, ps httprouter.
 	w.Write([]byte(renderDigest(digest, s.baseURL)))
 }
 
-const templateDigest = "server/digest.gotmpl"
+const templateDigest = "server/digest.html"
 
 // renderDigest renders the HTML representation of a digest
 // TODO: Load the templates once in initialization, instead of every render
@@ -177,6 +177,7 @@ func renderDigest(digest models.Digest, baseURL string) string {
 			},
 			"trunc":      models.Truncate,
 			"apolloLink": apolloURLHelper,
+			"md":         formatMarkdown,
 		}).ParseFiles(templateDigest)
 	if err != nil {
 		log.Printf("Failed to parse template: %s", err)

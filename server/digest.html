@@ -123,7 +123,7 @@
             <a href="{{apolloLink .CommentsLink}}">{{.NumComments}} comments</a> | <a href="{{.CommentsLink}}">web</a> • {{trimWww .Hostname}}</div>
 
           {{if ne .Text ""}}
-          <div class="selftext">{{trunc .Text 500}}</div>
+          <div class="selftext">{{md .Text 1000}}</div>
           {{end}}
 
         </div>
